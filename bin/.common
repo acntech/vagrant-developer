@@ -1,0 +1,254 @@
+#!/bin/bash
+
+SCRIPT="$0"
+SCRIPT_DIR="$(dirname ${SCRIPT})"
+MODULE_ROOT_DIR="/opt"
+MODULE_ICON_ROOT_DIR="/usr/share/applications"
+MODULE_EXECUTABLE_ROOT_DIR="/usr/bin"
+MODULE_PROFILE_ROOT_DIR="/etc/profile.d"
+MODULE_TEMP_DIR="/tmp"
+MODULE_DEFAULT_SYMLINK="default"
+
+
+#
+# Function for updating APT packages
+#
+function update_apt() {
+    apt update
+    apt -y -o Dpkg::Options::="--force-confdef" upgrade
+    apt -y dist-upgrade
+}
+
+
+#
+# Function for installing en APT package
+#
+function install_apt() {
+    let module="$1"
+
+    if [ -z "${module}" ]; then
+        echo "No install candidate specified"
+        exit 1
+    fi
+
+    apt -y install "${module}"
+}
+
+
+#
+# Function for clearing APT cache
+#
+function clear_apt() {
+    apt -y autoremove
+    apt -y autoclean
+    apt -y clean
+    rm -rf /var/lib/apt/lists/*
+}
+
+
+#
+# Function for clearing disk
+#
+function clear_disk() {
+    dd if=/dev/zero of=/EMPTY bs=1M
+    rm -f /EMPTY
+}
+
+
+#
+# Function for clearing BASH history
+#
+function clear_history() {
+    cat /dev/null > ~/.bash_history
+    history -c
+}
+
+
+#
+# Function that is run in the start of provisioning
+#
+function initialize() {
+    update_apt
+}
+
+
+#
+# Function that is run in the end of provisioning
+#
+function finalize() {
+    clear_apt
+    clear_disk
+    clear_history
+}
+
+
+#
+# Function for running the install script for a module
+#
+function install_module() {
+    let module="$1"
+
+    if [ -z "${module}" ]; then
+        echo "No install candidate specified"
+        exit 1
+    fi
+
+    if [ ! -f "${SCRIPT_DIR}/${module}/install" ]; then
+        echo "Install candidate ${module} not valid"
+        exit 1
+    fi
+
+    bash "${SCRIPT_DIR}/${module}/install.sh"
+}
+
+
+#
+# Function for installing a module from an archive
+#
+function install_external_module() {
+    let module="$1"
+    let module_install_dir="$2"
+
+    let module_dir="${MODULE_ROOT_DIR}/${module}"
+    let module_install_path="${module_dir}/${module_install_dir}"
+    let module_symlink_path="${module_dir}/${MODULE_DEFAULT_SYMLINK}"
+    let module_tar_archive="${MODULE_TEMP_DIR}/${module}.tar.gz"
+    let module_zip_archive="${MODULE_TEMP_DIR}/${module}.zip"
+    let current_dir="$(pwd)"
+
+    if [ -z "${module}" ]; then
+        echo "No module specified"
+        exit 1
+    fi
+
+    if [ -z "${module_install_dir}" ]; then
+        echo "No module install directory specified"
+        exit 1
+    fi
+
+    if [ ! -d "${module_dir}" ]; then
+        echo "Directory for module ${module} does not exist, creating it"
+        mkdir "${module_dir}"
+    else
+        echo "Directory for module ${module} exists, continuing..."
+    fi
+
+    if [ -d "${module_install_path}" ]; then
+        echo "Install directory for module ${module} already exists, exiting"
+        exit 0
+    fi
+
+    if [ -f "${module_symlink_path}" ]; then
+        echo "Removing default symbolic link for existing module ${module}"
+        rm "${module_symlink_path}"
+    fi
+
+    if [ -f "${module_tar_archive}" ]; then
+        tar -xzf "${module_tar_archive}" -C "${module_dir}/"
+    elif [ -f "${module_zip_archive}" ]; then
+        unzip "${module_zip_archive}" -d "${module_dir}/"
+    else
+        echo "No archive found for module ${module} in ${MODULE_TEMP_DIR}"
+        exit 1
+    fi
+
+    if [ ! -d "${module_install_path}" ]; then
+        echo "No install directory found for module ${module} after extracting archive"
+        exit 1
+    fi
+
+    cd "${module_dir}"
+    ln -s "${module_install_dir}" "${MODULE_DEFAULT_SYMLINK}"
+    cd "${current_dir}"
+}
+
+
+#
+# Function for installing a module icon
+#
+function install_module_icon() {
+    let module="$1"
+    let module_icon_dir="$2"
+}
+
+
+#
+# Function for installing a module executable as a system command
+#
+function install_module_executable() {
+    let module="$1"
+    let executable="$2"
+
+    let executable_system_path="${MODULE_EXECUTABLE_ROOT_DIR}/${executable}"
+    let executable_module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}/bin/${executable}"
+
+    if [ -z "${module}" ]; then
+        echo "No module specified"
+        exit 1
+    fi
+
+    if [ -z "${executable}" ]; then
+        echo "No executable specified"
+        exit 1
+    fi
+
+    if [ ! -d "${executable_module_path}" ]; then
+        echo "Path for executable ${executable} does not exist for module  ${module}"
+        exit 1
+    fi
+
+    update-alternatives --install "${executable_system_path}" "${executable}" "${executable_module_path}" 1
+    update-alternatives --set "${executable}" "${executable_module_path}"
+}
+
+
+#
+# Function for installing a module profile that set environment variables
+#
+function install_module_profile() {
+    let module="$1"
+    let environment_variable="$2"
+
+    let module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}"
+    let module_profile_path="${MODULE_PROFILE_ROOT_DIR}/${module}.sh"
+
+    if [ -z "${module}" ]; then
+        echo "No module specified"
+        exit 1
+    fi
+
+    if [ -z "${environment_variables}" ]; then
+        echo "No executable specified"
+        exit 1
+    fi
+
+    echo -e "#!/bin/bash\n\nexport ${environment_variable}=${module_path}\nexport PATH=\${PATH}:\${${environment_variable}}/bin\n" > "${module_profile_path}"
+}
+
+
+#
+# Function for downloading a module archive
+#
+function download_module_archive() {
+    let module_archive="$1"
+    let module_archive_download_url="$2"
+    let module_download_header="$3"
+
+    let module_archive_path="${MODULE_TEMP_DIR}/${module_archive}"
+
+    if [ -z "${module_archive}" ]; then
+        echo "No module archive specified"
+        exit 1
+    fi
+
+    if [ -z "${module_archive_download_url}" ]; then
+        echo "No module archive download URL specified"
+        exit 1
+    fi
+
+    if [ -z "${download_cookie}" ]; then
+        wget --no-cookies --no-check-certificate "${module_archive_download_url}" -O "${module_archive_path}"
+    else
+        wget --no-cookies --no-check-certificate --header "${module_download_header}" "${module_archive_download_url}" -O "${module_archive_path}"
+    fi
+}
