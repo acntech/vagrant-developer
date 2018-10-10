@@ -3,7 +3,7 @@
 SCRIPT="$0"
 SCRIPT_DIR="$(dirname ${SCRIPT})"
 
-source "${SCRIPT_DIR}/.common"
+source "${SCRIPT_DIR}/../.common"
 
 MODULE_NAME="maven"
 MODULE_VERSION="3.5.4"

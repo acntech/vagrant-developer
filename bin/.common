@@ -2,12 +2,56 @@
 
 SCRIPT="$0"
 SCRIPT_DIR="$(dirname ${SCRIPT})"
+
 MODULE_ROOT_DIR="/opt"
 MODULE_ICON_ROOT_DIR="/usr/share/applications"
 MODULE_EXECUTABLE_ROOT_DIR="/usr/bin"
 MODULE_PROFILE_ROOT_DIR="/etc/profile.d"
+MODULE_APT_REPO_LIST_DIR="/etc/apt/sources.list.d"
 MODULE_TEMP_DIR="/tmp"
 MODULE_DEFAULT_SYMLINK="default"
+
+#
+# Function for adding APT key
+#
+function add_apt_key() {
+    local url="$1"
+
+    if [ -z "${url}" ]; then
+        echo "No APT key URL specified"
+        exit 1
+    fi
+
+    curl -fsSL "${url}" | apt-key add -
+}
+
+
+#
+# Function for adding APT repository
+#
+function add_apt_repo() {
+    local module="$1"
+    local repo="$2"
+
+    local repo_list="${MODULE_APT_REPO_LIST_DIR}/${module}.list"
+
+    if [ -z "${module}" ]; then
+        echo "No module specified"
+        exit 1
+    fi
+
+    if [ -z "${repo}" ]; then
+        echo "No APT repository specified"
+        exit 1
+    fi
+
+    if [ -f "${repo_list}" ]; then
+        echo "APT repository already exists"
+    else
+        echo "${repo}" > "${repo_list}"
+        apt update
+    fi
+}
 
 
 #
@@ -24,14 +68,19 @@ function update_apt() {
 # Function for installing en APT package
 #
 function install_apt() {
-    let module="$1"
+    local package="$1"
 
-    if [ -z "${module}" ]; then
-        echo "No install candidate specified"
+    if [ -z "${package}" ]; then
+        echo "No package specified"
         exit 1
     fi
 
-    apt -y install "${module}"
+    dpkg -l | grep "${package}" > /dev/null
+    if [ $? ]; then
+        echo "Package ${package} is already installed"
+    else
+        apt -y install "${package}"
+    fi
 }
 
 
@@ -68,6 +117,14 @@ function clear_history() {
 # Function that is run in the start of provisioning
 #
 function initialize() {
+    echo ""
+    echo " ############################################"
+    echo " #"
+    echo " #  Initialize provisioning..."
+    echo " #"
+    echo " ############################################"
+    echo ""
+
     update_apt
 }
 
@@ -76,6 +133,14 @@ function initialize() {
 # Function that is run in the end of provisioning
 #
 function finalize() {
+    echo ""
+    echo " ############################################"
+    echo " #"
+    echo " #  Finalize provisioning..."
+    echo " #"
+    echo " ############################################"
+    echo ""
+
     clear_apt
     clear_disk
     clear_history
@@ -86,14 +151,22 @@ function finalize() {
 # Function for running the install script for a module
 #
 function install_module() {
-    let module="$1"
+    local module="$1"
+
+    echo ""
+    echo " ############################################"
+    echo " #"
+    echo " #  Installing module ${module}"
+    echo " #"
+    echo " ############################################"
+    echo ""
 
     if [ -z "${module}" ]; then
         echo "No install candidate specified"
         exit 1
     fi
 
-    if [ ! -f "${SCRIPT_DIR}/${module}/install" ]; then
+    if [ ! -f "${SCRIPT_DIR}/${module}/install.sh" ]; then
         echo "Install candidate ${module} not valid"
         exit 1
     fi
@@ -106,15 +179,15 @@ function install_module() {
 # Function for installing a module from an archive
 #
 function install_external_module() {
-    let module="$1"
-    let module_install_dir="$2"
+    local module="$1"
+    local module_install_dir="$2"
 
-    let module_dir="${MODULE_ROOT_DIR}/${module}"
-    let module_install_path="${module_dir}/${module_install_dir}"
-    let module_symlink_path="${module_dir}/${MODULE_DEFAULT_SYMLINK}"
-    let module_tar_archive="${MODULE_TEMP_DIR}/${module}.tar.gz"
-    let module_zip_archive="${MODULE_TEMP_DIR}/${module}.zip"
-    let current_dir="$(pwd)"
+    local module_dir="${MODULE_ROOT_DIR}/${module}"
+    local module_install_path="${module_dir}/${module_install_dir}"
+    local module_symlink_path="${module_dir}/${MODULE_DEFAULT_SYMLINK}"
+    local module_tar_archive="${MODULE_TEMP_DIR}/${module}.tar.gz"
+    local module_zip_archive="${MODULE_TEMP_DIR}/${module}.zip"
+    local current_dir="$(pwd)"
 
     if [ -z "${module}" ]; then
         echo "No module specified"
@@ -167,8 +240,8 @@ function install_external_module() {
 # Function for installing a module icon
 #
 function install_module_icon() {
-    let module="$1"
-    let module_icon_dir="$2"
+    local module="$1"
+    local module_icon_dir="$2"
 }
 
 
@@ -176,11 +249,11 @@ function install_module_icon() {
 # Function for installing a module executable as a system command
 #
 function install_module_executable() {
-    let module="$1"
-    let executable="$2"
+    local module="$1"
+    local executable="$2"
 
-    let executable_system_path="${MODULE_EXECUTABLE_ROOT_DIR}/${executable}"
-    let executable_module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}/bin/${executable}"
+    local executable_system_path="${MODULE_EXECUTABLE_ROOT_DIR}/${executable}"
+    local executable_module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}/bin/${executable}"
 
     if [ -z "${module}" ]; then
         echo "No module specified"
@@ -206,11 +279,11 @@ function install_module_executable() {
 # Function for installing a module profile that set environment variables
 #
 function install_module_profile() {
-    let module="$1"
-    let environment_variable="$2"
+    local module="$1"
+    local environment_variable="$2"
 
-    let module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}"
-    let module_profile_path="${MODULE_PROFILE_ROOT_DIR}/${module}.sh"
+    local module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}"
+    local module_profile_path="${MODULE_PROFILE_ROOT_DIR}/${module}.sh"
 
     if [ -z "${module}" ]; then
         echo "No module specified"
@@ -230,11 +303,11 @@ function install_module_profile() {
 # Function for downloading a module archive
 #
 function download_module_archive() {
-    let module_archive="$1"
-    let module_archive_download_url="$2"
-    let module_download_header="$3"
+    local module_archive="$1"
+    local module_archive_download_url="$2"
+    local module_download_header="$3"
 
-    let module_archive_path="${MODULE_TEMP_DIR}/${module_archive}"
+    local module_archive_path="${MODULE_TEMP_DIR}/${module_archive}"
 
     if [ -z "${module_archive}" ]; then
         echo "No module archive specified"
@@ -246,9 +319,18 @@ function download_module_archive() {
         exit 1
     fi
 
+    echo "Downloading module archive"
+    local success=0
     if [ -z "${download_cookie}" ]; then
-        wget --no-cookies --no-check-certificate "${module_archive_download_url}" -O "${module_archive_path}"
+        wget --quiet --no-cookies --no-check-certificate "${module_archive_download_url}" -O "${module_archive_path}"
+        success=$?
     else
-        wget --no-cookies --no-check-certificate --header "${module_download_header}" "${module_archive_download_url}" -O "${module_archive_path}"
+        wget --quiet --no-cookies --no-check-certificate --header "${module_download_header}" "${module_archive_download_url}" -O "${module_archive_path}"
+        success=$?
+    fi
+
+    if [ "${success}" != 0 ]; then
+        echo "Error occurred when downloading module archive"
+        exit 1
     fi
 }
