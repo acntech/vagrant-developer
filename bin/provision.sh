@@ -5,7 +5,7 @@ SCRIPT_DIR="$(dirname ${SCRIPT})"
 
 source "${SCRIPT_DIR}/.common"
 
-#initialize
+initialize
 
 #install_module "rng"
 install_module "git"
@@ -15,4 +15,4 @@ install_module "maven"
 install_module "nodejs"
 install_module "intellij"
 
-#finalize
+finalize
