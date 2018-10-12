@@ -26,3 +26,15 @@ Start the box by issuing the following command from the command line inside the 
 ```
 vagrant up
 ```
+
+### Installed tools
+The box has the following developer tools installed.
+
+* Git 2.7.4
+* Docker 18.06.1 Community Edition
+* Docker Compose 1.22.0
+* Oracle Java JDK 8u181
+  * Java Security RNG changed to /dev/urandom
+* Apache Maven 3.5.4
+* NodeJS 10.12.0
+* JetBrains IntelliJ 2018.2.4 Community Edition

@@ -4,7 +4,7 @@ SCRIPT="$0"
 SCRIPT_DIR="$(dirname ${SCRIPT})"
 
 MODULE_ROOT_DIR="/opt"
-MODULE_ICON_ROOT_DIR="/usr/share/applications"
+MODULE_DESKTOP_ENTRY_ROOT_DIR="/usr/share/applications"
 MODULE_EXECUTABLE_ROOT_DIR="/usr/bin"
 MODULE_PROFILE_ROOT_DIR="/etc/profile.d"
 MODULE_APT_REPO_LIST_DIR="/etc/apt/sources.list.d"
@@ -15,14 +15,21 @@ MODULE_DEFAULT_SYMLINK="default"
 # Function for adding APT key
 #
 function add_apt_key() {
-    local url="$1"
+    local module="$1"
+    local url="$2"
+
+    local key_file_path="${MODULE_TEMP_DIR}/${module}.key"
+
+    echo " "
 
     if [ -z "${url}" ]; then
-        echo "No APT key URL specified"
+        echo " No APT key URL specified"
         exit 1
     fi
 
-    curl -fsSL "${url}" | apt-key add -
+    echo " Adding APT key for module ${module}"
+    curl -fsSL "${url}" -o "${key_file_path}"
+    apt-key add "${key_file_path}" > /dev/null
 }
 
 
@@ -35,21 +42,24 @@ function add_apt_repo() {
 
     local repo_list="${MODULE_APT_REPO_LIST_DIR}/${module}.list"
 
+    echo " "
+
     if [ -z "${module}" ]; then
-        echo "No module specified"
+        echo " No module specified"
         exit 1
     fi
 
     if [ -z "${repo}" ]; then
-        echo "No APT repository specified"
+        echo " No APT repository specified"
         exit 1
     fi
 
     if [ -f "${repo_list}" ]; then
-        echo "APT repository already exists"
+        echo " APT repository for module ${module} already exists"
     else
+        echo " Adding APT repository for module ${module}"
         echo "${repo}" > "${repo_list}"
-        apt update
+        apt-get update > /dev/null
     fi
 }
 
@@ -58,9 +68,11 @@ function add_apt_repo() {
 # Function for updating APT packages
 #
 function update_apt() {
-    apt update
-    apt -y -o Dpkg::Options::="--force-confdef" upgrade
-    apt -y dist-upgrade
+    echo " "
+    echo " Updating APT packages, please wait..."
+    apt-get update > /dev/null
+    apt-get -y -o Dpkg::Options::="--force-confdef" upgrade > /dev/null
+    apt-get -y dist-upgrade > /dev/null
 }
 
 
@@ -70,16 +82,19 @@ function update_apt() {
 function install_apt() {
     local package="$1"
 
+    echo " "
+
     if [ -z "${package}" ]; then
-        echo "No package specified"
+        echo " No APT package specified"
         exit 1
     fi
 
-    dpkg -l | grep "${package}" > /dev/null
-    if [ $? ]; then
-        echo "Package ${package} is already installed"
+    c=$(dpkg -l | grep -c -e "\s${package}\s")
+    if [ $c -gt 0 ]; then
+        echo " APT package ${package} is already installed"
     else
-        apt -y install "${package}"
+        echo " Installing APT package ${package}"
+        apt-get -y install "${package}" > /dev/null
     fi
 }
 
@@ -88,9 +103,11 @@ function install_apt() {
 # Function for clearing APT cache
 #
 function clear_apt() {
-    apt -y autoremove
-    apt -y autoclean
-    apt -y clean
+    echo " "
+    echo " Clearing APT cache"
+    apt-get -y autoremove > /dev/null
+    apt-get -y autoclean > /dev/null
+    apt-get -y clean > /dev/null
     rm -rf /var/lib/apt/lists/*
 }
 
@@ -99,6 +116,9 @@ function clear_apt() {
 # Function for clearing disk
 #
 function clear_disk() {
+    echo " "
+    echo " Clearing image disk"
+    rm -rf "${MODULE_TEMP_DIR}/*"
     dd if=/dev/zero of=/EMPTY bs=1M
     rm -f /EMPTY
 }
@@ -108,6 +128,8 @@ function clear_disk() {
 # Function for clearing BASH history
 #
 function clear_history() {
+    echo " "
+    echo " Clearing BASH history"
     cat /dev/null > ~/.bash_history
     history -c
 }
@@ -117,13 +139,12 @@ function clear_history() {
 # Function that is run in the start of provisioning
 #
 function initialize() {
-    echo ""
+    echo " "
     echo " ############################################"
     echo " #"
     echo " #  Initialize provisioning..."
     echo " #"
     echo " ############################################"
-    echo ""
 
     update_apt
 }
@@ -133,13 +154,12 @@ function initialize() {
 # Function that is run in the end of provisioning
 #
 function finalize() {
-    echo ""
+    echo " "
     echo " ############################################"
     echo " #"
     echo " #  Finalize provisioning..."
     echo " #"
     echo " ############################################"
-    echo ""
 
     clear_apt
     clear_disk
@@ -153,21 +173,20 @@ function finalize() {
 function install_module() {
     local module="$1"
 
-    echo ""
+    echo " "
     echo " ############################################"
     echo " #"
     echo " #  Installing module ${module}"
     echo " #"
     echo " ############################################"
-    echo ""
 
     if [ -z "${module}" ]; then
-        echo "No install candidate specified"
+        echo " No install candidate specified"
         exit 1
     fi
 
     if [ ! -f "${SCRIPT_DIR}/${module}/install.sh" ]; then
-        echo "Install candidate ${module} not valid"
+        echo " Install candidate ${module} not valid"
         exit 1
     fi
 
@@ -189,47 +208,50 @@ function install_external_module() {
     local module_zip_archive="${MODULE_TEMP_DIR}/${module}.zip"
     local current_dir="$(pwd)"
 
+    echo " "
+
     if [ -z "${module}" ]; then
-        echo "No module specified"
+        echo " No module specified"
         exit 1
     fi
 
     if [ -z "${module_install_dir}" ]; then
-        echo "No module install directory specified"
+        echo " No module install directory specified"
         exit 1
     fi
 
     if [ ! -d "${module_dir}" ]; then
-        echo "Directory for module ${module} does not exist, creating it"
+        echo " Directory for module ${module} does not exist, creating it"
         mkdir "${module_dir}"
     else
-        echo "Directory for module ${module} exists, continuing..."
+        echo " Directory for module ${module} exists, continuing..."
     fi
 
     if [ -d "${module_install_path}" ]; then
-        echo "Install directory for module ${module} already exists, exiting"
+        echo " Install directory for module ${module} already exists, exiting"
         exit 0
     fi
 
     if [ -f "${module_symlink_path}" ]; then
-        echo "Removing default symbolic link for existing module ${module}"
+        echo " Removing default symbolic link for existing module ${module}"
         rm "${module_symlink_path}"
     fi
 
     if [ -f "${module_tar_archive}" ]; then
-        tar -xzf "${module_tar_archive}" -C "${module_dir}/"
+        tar -xzf "${module_tar_archive}" -C "${module_install_path}"
     elif [ -f "${module_zip_archive}" ]; then
         unzip "${module_zip_archive}" -d "${module_dir}/"
     else
-        echo "No archive found for module ${module} in ${MODULE_TEMP_DIR}"
+        echo " No archive found for module ${module} in ${MODULE_TEMP_DIR}"
         exit 1
     fi
 
     if [ ! -d "${module_install_path}" ]; then
-        echo "No install directory found for module ${module} after extracting archive"
+        echo " No install directory found for module ${module} after extracting archive"
         exit 1
     fi
 
+    echo " Installing default symlink for module ${module}"
     cd "${module_dir}"
     ln -s "${module_install_dir}" "${MODULE_DEFAULT_SYMLINK}"
     cd "${current_dir}"
@@ -237,11 +259,55 @@ function install_external_module() {
 
 
 #
-# Function for installing a module icon
+# Function for installing a desktop entry
 #
-function install_module_icon() {
+function install_module_desktop_entry() {
     local module="$1"
-    local module_icon_dir="$2"
+    local module_description="$2"
+    local module_executable_path="$3"
+    local module_icon_path="$4"
+    local module_categories="$4"
+
+    local desktop_entry="${module}.desktop"
+    local desktop_entry_path="${MODULE_DESKTOP_ENTRY_ROOT_DIR}/${module}.desktop"
+
+    echo " "
+
+    if [ -z "${module}" ]; then
+        echo " No module specified"
+        exit 1
+    fi
+
+    if [ -z "${module_description}" ]; then
+        echo " No module description specified"
+        exit 1
+    fi
+
+    if [ -z "${momodule_executable_pathdule}" ]; then
+        echo " No module executable path specified"
+        exit 1
+    fi
+
+    if [ -z "${module_icon_path}" ]; then
+        echo " No module icon path specified"
+        exit 1
+    fi
+
+    if [ -z "${module_categories}" ]; then
+        echo " No module categories specified"
+        exit 1
+    fi
+
+    echo " Installing desktop entry for module ${module}"
+    echo "[Desktop Entry] \
+          Version=1.0 \
+          Name=${module_description} \
+          Comment=${module_description} \
+          Exec=env UBUNTU_MENUPROXY= ${module_executable_path} \
+          Icon=${module_icon_path} \
+          Terminal=false \
+          Type=Application \
+          Categories=${module_categories}" > "${desktop_entry_path}"
 }
 
 
@@ -255,23 +321,26 @@ function install_module_executable() {
     local executable_system_path="${MODULE_EXECUTABLE_ROOT_DIR}/${executable}"
     local executable_module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}/bin/${executable}"
 
+    echo " "
+
     if [ -z "${module}" ]; then
-        echo "No module specified"
+        echo " No module specified"
         exit 1
     fi
 
     if [ -z "${executable}" ]; then
-        echo "No executable specified"
+        echo " No executable specified"
         exit 1
     fi
 
     if [ ! -f "${executable_module_path}" ]; then
-        echo "Path for executable ${executable} does not exist for module  ${module}"
+        echo " Path for executable ${executable} does not exist for module ${module}"
         exit 1
     fi
 
-    update-alternatives --install "${executable_system_path}" "${executable}" "${executable_module_path}" 1
-    update-alternatives --set "${executable}" "${executable_module_path}"
+    echo " Installing executable alternatives for module ${module}"
+    update-alternatives --install "${executable_system_path}" "${executable}" "${executable_module_path}" 1 > /dev/null
+    update-alternatives --set "${executable}" "${executable_module_path}" > /dev/null
 }
 
 
@@ -285,16 +354,19 @@ function install_module_profile() {
     local module_path="${MODULE_ROOT_DIR}/${module}/${MODULE_DEFAULT_SYMLINK}"
     local module_profile_path="${MODULE_PROFILE_ROOT_DIR}/${module}.sh"
 
+    echo " "
+
     if [ -z "${module}" ]; then
-        echo "No module specified"
+        echo " No module specified"
         exit 1
     fi
 
     if [ -z "${environment_variables}" ]; then
-        echo "No executable specified"
+        echo " No executable specified"
         exit 1
     fi
 
+    echo " Installing profile for module ${module}"
     echo -e "#!/bin/bash\n\nexport ${environment_variable}=${module_path}\nexport PATH=\${PATH}:\${${environment_variable}}/bin\n" > "${module_profile_path}"
 }
 
@@ -309,17 +381,24 @@ function download_module_archive() {
 
     local module_archive_path="${MODULE_TEMP_DIR}/${module_archive}"
 
+    echo " "
+
     if [ -z "${module_archive}" ]; then
-        echo "No module archive specified"
+        echo " No module archive specified"
         exit 1
     fi
 
     if [ -z "${module_archive_download_url}" ]; then
-        echo "No module archive download URL specified"
+        echo " No module archive download URL specified"
         exit 1
     fi
 
-    echo "Downloading module archive"
+    if [ -f "${module_archive_path}" ]; then
+        echo " Module archive already exists. Delete it to force new download"
+        exit 0
+    fi
+
+    echo " Downloading module archive, please wait..."
     local success=0
     if [ -z "${module_download_header}" ]; then
         wget --quiet --no-cookies --no-check-certificate "${module_archive_download_url}" -O "${module_archive_path}"
