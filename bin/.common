@@ -265,7 +265,7 @@ function install_module_executable() {
         exit 1
     fi
 
-    if [ ! -d "${executable_module_path}" ]; then
+    if [ ! -f "${executable_module_path}" ]; then
         echo "Path for executable ${executable} does not exist for module  ${module}"
         exit 1
     fi
@@ -321,11 +321,11 @@ function download_module_archive() {
 
     echo "Downloading module archive"
     local success=0
-    if [ -z "${download_cookie}" ]; then
+    if [ -z "${module_download_header}" ]; then
         wget --quiet --no-cookies --no-check-certificate "${module_archive_download_url}" -O "${module_archive_path}"
         success=$?
     else
-        wget --quiet --no-cookies --no-check-certificate --header "${module_download_header}" "${module_archive_download_url}" -O "${module_archive_path}"
+        wget --quiet --no-check-certificate --header="${module_download_header}" "${module_archive_download_url}" -O "${module_archive_path}"
         success=$?
     fi
 
