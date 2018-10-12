@@ -10,6 +10,7 @@ MODULE_VERSION="2018.2.4"
 MODULE_EDITION="ideaIC"
 MODULE_DESCRIPTION="IntelliJ IDEA Community"
 MODULE_INSTALL_DIR="${MODULE_EDITION}-${MODULE_VERSION}"
+MODULE_TEMP_INSTALL_DIR="idea-IC-182.4505.22"
 MODULE_ARCHIVE="${MODULE_NAME}.tar.gz"
 MODULE_ARCHIVE_DOWNLOAD_URL="https://download.jetbrains.com/idea/${MODULE_EDITION}-${MODULE_VERSION}-no-jdk.tar.gz"
 MODULE_EXECUTABLE="/opt/${MODULE_NAME}/default/bin/idea.sh"
@@ -20,7 +21,7 @@ MODULE_CATEGORIES="Development;Application;"
 download_module_archive "${MODULE_ARCHIVE}" "${MODULE_ARCHIVE_DOWNLOAD_URL}"
 
 # Install module
-install_external_module "${MODULE_NAME}" "${MODULE_INSTALL_DIR}"
+install_external_module "${MODULE_NAME}" "${MODULE_INSTALL_DIR}" "${MODULE_TEMP_INSTALL_DIR}"
 
 # Set module profile
 install_module_profile "${MODULE_NAME}" "IDEA_HOME"

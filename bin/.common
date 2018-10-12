@@ -200,9 +200,11 @@ function install_module() {
 function install_external_module() {
     local module="$1"
     local module_install_dir="$2"
+    local module_temp_install_dir="$3"
 
     local module_dir="${MODULE_ROOT_DIR}/${module}"
     local module_install_path="${module_dir}/${module_install_dir}"
+    local module_temp_install_path="${module_dir}/${module_temp_install_dir}"
     local module_symlink_path="${module_dir}/${MODULE_DEFAULT_SYMLINK}"
     local module_tar_archive="${MODULE_TEMP_DIR}/${module}.tar.gz"
     local module_zip_archive="${MODULE_TEMP_DIR}/${module}.zip"
@@ -237,13 +239,19 @@ function install_external_module() {
         rm "${module_symlink_path}"
     fi
 
+    echo " Extracting archive for module ${module}"
     if [ -f "${module_tar_archive}" ]; then
-        tar -xzf "${module_tar_archive}" -C "${module_install_path}"
+        tar -xzf "${module_tar_archive}" -C "${module_dir}"
     elif [ -f "${module_zip_archive}" ]; then
         unzip "${module_zip_archive}" -d "${module_dir}/"
     else
         echo " No archive found for module ${module} in ${MODULE_TEMP_DIR}"
         exit 1
+    fi
+
+    if [ ! -z "${module_temp_install_dir}" ]; then
+        echo " Moving module ${module} installation from ${module_temp_install_dir} to ${module_install_dir}"
+        mv "${module_temp_install_path}" "${module_install_path}"
     fi
 
     if [ ! -d "${module_install_path}" ]; then
@@ -283,7 +291,7 @@ function install_module_desktop_entry() {
         exit 1
     fi
 
-    if [ -z "${momodule_executable_pathdule}" ]; then
+    if [ -z "${module_executable_path}" ]; then
         echo " No module executable path specified"
         exit 1
     fi
@@ -361,8 +369,8 @@ function install_module_profile() {
         exit 1
     fi
 
-    if [ -z "${environment_variables}" ]; then
-        echo " No executable specified"
+    if [ -z "${environment_variable}" ]; then
+        echo " No environment variable specified"
         exit 1
     fi
 
@@ -395,7 +403,7 @@ function download_module_archive() {
 
     if [ -f "${module_archive_path}" ]; then
         echo " Module archive already exists. Delete it to force new download"
-        exit 0
+        return
     fi
 
     echo " Downloading module archive, please wait..."
