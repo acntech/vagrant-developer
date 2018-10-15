@@ -1,9 +1,7 @@
 # AcnTech Ubuntu Developer
-AcnTech Ubuntu Developer box based on [acntech/ubuntu](https://app.vagrantup.com/acntech/boxes/ubuntu) v2.0.0 with Ubuntu Desktop 18.04.1 LTS 64-bit installed on a 80 GB disk.
+AcnTech Ubuntu Developer box based on [acntech/ubuntu](https://app.vagrantup.com/acntech/boxes/ubuntu) v2.0.0 with Ubuntu Desktop 18.04.1 LTS 64-bit installed on a 100 GB disk.
 
 Created with Vagrant 2.1.2 and VirtualBox 5.2.18.
-
-Provisioned with Puppet 5.3.
 
 ### Prerequisites
 The host computer must have _Intel VT/AMD-V_ virtualization support enabled in the BIOS.

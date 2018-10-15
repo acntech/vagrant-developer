@@ -307,15 +307,15 @@ function install_module_desktop_entry() {
     fi
 
     echo " Installing desktop entry for module ${module}"
-    echo "[Desktop Entry] \
-          Version=1.0 \
-          Name=${module_description} \
-          Comment=${module_description} \
-          Exec=env UBUNTU_MENUPROXY= ${module_executable_path} \
-          Icon=${module_icon_path} \
-          Terminal=false \
-          Type=Application \
-          Categories=${module_categories}" > "${desktop_entry_path}"
+    echo -e "[Desktop Entry]\n \
+             Version=1.0\n \
+             Name=${module_description}\n \
+             Comment=${module_description}\n \
+             Exec=env UBUNTU_MENUPROXY= ${module_executable_path}\n \
+             Icon=${module_icon_path}\n \
+             Terminal=false\n \
+             Type=Application\n \
+             Categories=${module_categories}\n" > "${desktop_entry_path}"
 }
 
 

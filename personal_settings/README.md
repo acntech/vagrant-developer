@@ -1,4 +1,10 @@
-# AcnTech Ubuntu Developer
+## Customize VirtualBox settings
+
+Use the approach specified below to change the default settings of the VirtualBox VM, such as changing the amount of memory or numer of CPUs.
+
+Warning: Do not change the settings directly in the VirtualBox Manager, as these changed are reset the next time you run ```vagrant up```.
+
+### Setup
 
 Add a virtualbox_settings.rb file in this folder to customize VirtualBox settings.
 
