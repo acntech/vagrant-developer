@@ -6,24 +6,27 @@ SCRIPT_DIR="$(dirname ${SCRIPT})"
 source "${SCRIPT_DIR}/../.common"
 
 MODULE_NAME="docker"
+MODULE_GPG_KEY_URL="https://download.docker.com/linux/ubuntu/gpg"
+MODULE_APT_REPO_URL="https://download.docker.com/linux/ubuntu"
 
-DOCKER_COMPOSE_VERSION="1.22.0"
+DOCKER_COMPOSE_VERSION="1.23.1"
+DOCKER_COMPOSE_EXECUTABLE="docker-compose"
 OS_NAME="$(uname -s)"
 OS_ARCH="$(uname -m)"
 OS_FLAVOR="$(lsb_release -cs)"
+DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-${OS_NAME}-${OS_ARCH}"
 
 # Add GPG key for Docker APT repo
-add_apt_key "${MODULE_NAME}" "https://download.docker.com/linux/ubuntu/gpg"
+add_apt_key "${MODULE_NAME}" "${MODULE_GPG_KEY_URL}"
 
 # Add APT repo
-add_apt_repo "${MODULE_NAME}" "deb [arch=amd64] https://download.docker.com/linux/ubuntu ${OS_FLAVOR} stable"
+add_apt_repo "${MODULE_NAME}" "deb [arch=amd64] ${MODULE_APT_REPO_URL} ${OS_FLAVOR} stable"
 
 # Install Docker CE
 install_apt docker-ce
 
 # Install Docker Compose
-curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-${OS_NAME}-${OS_ARCH}" > /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+install_system_executable "${DOCKER_COMPOSE_EXECUTABLE}" "${DOCKER_COMPOSE_URL}"
 
 # Add vagrant user to docker group
-usermod -a -G docker vagrant
+add_user_to_group "docker"
