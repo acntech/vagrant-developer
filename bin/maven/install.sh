@@ -6,7 +6,7 @@ SCRIPT_DIR="$(dirname ${SCRIPT})"
 source "${SCRIPT_DIR}/../.common"
 
 MODULE_NAME="maven"
-MODULE_VERSION="3.5.4"
+MODULE_VERSION="3.6.0"
 MODULE_INSTALL_DIR="apache-maven-${MODULE_VERSION}"
 MODULE_ARCHIVE="${MODULE_NAME}.tar.gz"
 MODULE_ARCHIVE_DOWNLOAD_URL="https://www.apache.org/dist/maven/maven-3/${MODULE_VERSION}/binaries/apache-maven-${MODULE_VERSION}-bin.tar.gz"
@@ -15,10 +15,10 @@ MODULE_ARCHIVE_DOWNLOAD_URL="https://www.apache.org/dist/maven/maven-3/${MODULE_
 download_module_archive "${MODULE_ARCHIVE}" "${MODULE_ARCHIVE_DOWNLOAD_URL}"
 
 # Install module
-install_external_module "${MODULE_NAME}" "${MODULE_INSTALL_DIR}"
+install_archive_module "${MODULE_NAME}" "${MODULE_INSTALL_DIR}"
 
-# Set module profile
+# Update alternatives for executables
 install_module_executable "${MODULE_NAME}" "mvn"
 
-# Set JAVA_HOME and add binaries to PATH
-echo -e "#!/bin/bash\n\nexport MAVEN_HOME=/opt/maven/default\nexport M2_HOME=/opt/maven/default\nexport PATH=\${PATH}:\${MAVEN_HOME}/bin\n" > /etc/profile.d/maven.sh
+# Set module profile
+install_module_profile "${MODULE_NAME}" "MAVEN_HOME" "M2_HOME"
