@@ -5,6 +5,4 @@ SCRIPT_DIR="$(dirname ${SCRIPT})"
 
 source "${SCRIPT_DIR}/../common.sh"
 
-install_apt "rng-tools"
-
-echo -e "\nHRNGDEVICE=/dev/urandom" >> /etc/default/rng-tools
+install_snap "postman"

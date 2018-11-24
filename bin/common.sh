@@ -4,6 +4,8 @@ SCRIPT="$0"
 SCRIPT_DIR="$(dirname ${SCRIPT})"
 SCRIPT_LOG="/tmp/vagrant-provisioning.log"
 
+PROVISIONING_FLAG="/var/local/.vagrant-provisioning"
+
 DEFAULT_USER="vagrant"
 
 MODULE_ROOT_DIR="/opt"
@@ -29,8 +31,13 @@ function add_user_to_group() {
         exit 1
     fi
 
-    log " Adding user ${user} to group ${group}"
-    usermod -a -G "${group}" "${user}"
+    c=$(groups "${user}" | grep -c -e "\s${group}\s")
+    if [ $c -gt 0 ]; then
+        log " User ${user} already assigned to group ${group}"
+    else
+        log " Adding user ${user} to group ${group}"
+        usermod -a -G "${group}" "${user}"
+    fi
 }
 
 
@@ -54,6 +61,7 @@ function add_apt_key() {
     curl -fsSL "${url}" -o "${key_file_path}"
     export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true
     apt-key add "${key_file_path}" >> "${SCRIPT_LOG}" 2>&1
+    rm "${key_file_path}"
 }
 
 
@@ -129,6 +137,29 @@ function install_apt() {
 
 
 #
+# Function for installing en SNAP package
+#
+function install_snap() {
+    local package="$1"
+
+    log " "
+
+    if [ -z "${package}" ]; then
+        log " ERROR: No SNAP package specified"
+        exit 1
+    fi
+
+    c=$(snap list | awk '{ print $1 }' | grep -c "${package}")
+    if [ $c -gt 0 ]; then
+        log " SNAP package ${package} is already installed"
+    else
+        log " Installing SNAP package ${package}"
+        snap install "${package}" >> "${SCRIPT_LOG}" 2>&1
+    fi
+}
+
+
+#
 # Function for clearing APT cache
 #
 function clear_apt() {
@@ -190,9 +221,24 @@ function finalize() {
     log " #"
     log " ############################################"
 
-    clear_apt
-    clear_disk
-    clear_history
+    if [ ! -f "${PROVISIONING_FLAG}" ]; then
+        clear_apt
+        clear_disk
+        clear_history
+    else
+        log " "
+        log " Clearing of machine is disabled on already provisioned system"
+        log " Delete provision flag ${PROVISIONING_FLAG} to override"
+    fi
+
+    date > "${PROVISIONING_FLAG}"
+
+    log " "
+    log " ############################################"
+    log " #"
+    log " #  Provisioning complete! Enjoy!"
+    log " #"
+    log " ############################################"
 }
 
 
@@ -220,6 +266,19 @@ function install_module() {
     fi
 
     bash "${SCRIPT_DIR}/${module}/install.sh"
+}
+
+
+#
+# Function for checking if the install directory of a module exists
+#
+function module_install_dir_exist() {
+    local module="$1"
+    local module_install_dir="$2"
+
+    local module_install_path="${MODULE_ROOT_DIR}/${module}/${module_install_dir}"
+
+    test -d "${module_install_path}"
 }
 
 
@@ -258,7 +317,7 @@ function install_archive_module() {
     fi
 
     if [ -d "${module_install_path}" ]; then
-        log " Install directory for module ${module} already exists, exiting"
+        log " Install directory for module ${module} already exists"
         exit 0
     else
         log " Install directory for module ${module} does not exist, creating it"
@@ -273,8 +332,10 @@ function install_archive_module() {
     log " Extracting archive for module ${module}"
     if [ -f "${module_tar_archive}" ]; then
         tar -xzf "${module_tar_archive}" --strip "${module_archive_strip}" -C "${module_install_path}"
+        rm "${module_tar_archive}"
     elif [ -f "${module_zip_archive}" ]; then
         unzip "${module_zip_archive}" -d "${module_dir}/"
+        rm "${module_zip_archive}"
     else
         log " ERROR: No archive found for module ${module} in ${MODULE_TEMP_DIR}"
         exit 1
@@ -332,6 +393,11 @@ function install_module_desktop_entry() {
     if [ -z "${module_categories}" ]; then
         log " ERROR: No module categories specified"
         exit 1
+    fi
+
+    if [ -f "${desktop_entry_path}" ]; then
+        log " Desktop entry for module ${module} already exists"
+        exit 0
     fi
 
     log " Installing desktop entry for module ${module}"
@@ -437,7 +503,7 @@ function download_module_archive() {
 
     if [ -f "${module_archive_path}" ]; then
         log " Module archive already exists. Delete it to force new download"
-        return
+        exit 0
     fi
 
     log " Downloading module archive, please wait..."
@@ -477,6 +543,11 @@ function install_system_executable() {
     if [ -z "${executable_url}" ]; then
         log " ERROR: URL for executable ${executable} does not exist"
         exit 1
+    fi
+
+    if [ -f "${system_executable_path}" ]; then
+        log " System executable ${executable} already exists"
+        exit 0
     fi
 
     log " Installing system executable ${executable} to ${system_executable_dir}"

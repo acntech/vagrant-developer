@@ -3,12 +3,18 @@
 SCRIPT="$0"
 SCRIPT_DIR="$(dirname ${SCRIPT})"
 
-source "${SCRIPT_DIR}/../.common"
+source "${SCRIPT_DIR}/../common.sh"
+source "${SCRIPT_DIR}/version.sh"
 
 MODULE_NAME="java"
-MODULE_INSTALL_DIR="jdk1.8.0_191"
+MODULE_INSTALL_DIR="jdk${MODULE_VERSION}"
 MODULE_ARCHIVE="${MODULE_NAME}.tar.gz"
-MODULE_ARCHIVE_DOWNLOAD_URL="https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.tar.gz"
+
+if module_install_dir_exist "${MODULE_NAME}" "${MODULE_INSTALL_DIR}"; then
+    log " "
+    log " Module ${MODULE_NAME} is already installed"
+    exit 0
+fi
 
 # Download module
 download_module_archive "${MODULE_ARCHIVE}" "${MODULE_ARCHIVE_DOWNLOAD_URL}" "Cookie: oraclelicense=accept-securebackup-cookie"
