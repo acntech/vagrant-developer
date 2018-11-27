@@ -5,6 +5,6 @@ SCRIPT_DIR="$(dirname ${SCRIPT})"
 
 source "${SCRIPT_DIR}/../common.sh"
 
-install_apt "rng-tools"
-
-echo -e "\nHRNGDEVICE=/dev/urandom" >> /etc/default/rng-tools
+# Install APT packages
+install_apt "libaio1"
+install_apt "alien"

@@ -126,7 +126,7 @@ function install_apt() {
         exit 1
     fi
 
-    c=$(dpkg -l | grep -c -e "\s${package}\s")
+    c=$(dpkg -l | grep -c -e "\s${package}\s" || true)
     if [ $c -gt 0 ]; then
         log " APT package ${package} is already installed"
     else
@@ -179,7 +179,7 @@ function clear_disk() {
     log " "
     log " Clearing image disk, please wait..."
     rm -rf "${MODULE_TEMP_DIR}/*"
-    dd if=/dev/zero of=/EMPTY bs=1M >> "${SCRIPT_LOG}" 2>&1
+    dd if=/dev/zero of=/EMPTY bs=1M >> "${SCRIPT_LOG}" 2>&1 || true
     rm -f /EMPTY
 }
 
@@ -236,6 +236,7 @@ function finalize() {
     log " "
     log " ############################################"
     log " #"
+    log " #  SUCCESS!"
     log " #  Provisioning complete! Enjoy!"
     log " #"
     log " ############################################"
@@ -288,11 +289,12 @@ function module_install_dir_exist() {
 function install_archive_module() {
     local module="$1"
     local module_install_dir="$2"
-    local module_archive_strip="${3:-1}"
+    local module_symlink="${3:-${MODULE_DEFAULT_SYMLINK}}"
+    local module_archive_strip="${4:-1}"
 
     local module_dir="${MODULE_ROOT_DIR}/${module}"
     local module_install_path="${module_dir}/${module_install_dir}"
-    local module_symlink_path="${module_dir}/${MODULE_DEFAULT_SYMLINK}"
+    local module_symlink_path="${module_dir}/${module_symlink}"
     local module_tar_archive="${MODULE_TEMP_DIR}/${module}.tar.gz"
     local module_zip_archive="${MODULE_TEMP_DIR}/${module}.zip"
     local current_dir="$(pwd)"
@@ -324,7 +326,7 @@ function install_archive_module() {
         mkdir "${module_install_path}"
     fi
 
-    if [ -f "${module_symlink_path}" ]; then
+    if [ -h "${module_symlink_path}" ]; then
         log " Removing default symbolic link for existing module ${module}"
         rm "${module_symlink_path}"
     fi
@@ -346,9 +348,9 @@ function install_archive_module() {
         exit 1
     fi
 
-    log " Installing default symlink for module ${module}"
+    log " Installing symlink for module ${module}"
     cd "${module_dir}"
-    ln -s "${module_install_dir}" "${MODULE_DEFAULT_SYMLINK}"
+    ln -s "${module_install_dir}" "${module_symlink}"
     cd "${current_dir}"
 
     chown -R root:root "${module_dir}"
@@ -564,4 +566,45 @@ function log() {
 
     echo "${message}"
     echo "${message}" >> "${SCRIPT_LOG}"
+}
+
+
+#
+# Functions to handle errors
+#
+function on_error() {
+    local func="$1"
+    local line="$2"
+
+    log " "
+    log " ############################################"
+    log " #"
+    log " #  ERROR!"
+    log " #  Provisioning error occurred in function ${func}() on line ${line} of script ${BASH_SOURCE[0]}"
+    log " #  See logfile ${SCRIPT_LOG} for more details"
+    log " #"
+    log " ############################################"
+}
+
+
+#
+# Functions to handle interrupts
+#
+function on_interrupt() {
+    log " "
+    log " ############################################"
+    log " #"
+    log " #  INTERRUPTED!"
+    log " #  Provisioning was interrupted"
+    log " #  See logfile ${SCRIPT_LOG} for more details"
+    log " #"
+    log " ############################################"
+}
+
+
+#
+# Functions to handle errors
+#
+function on_exit() {
+    log " "
 }

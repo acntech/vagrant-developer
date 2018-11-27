@@ -11,7 +11,3 @@ fi
 echo " "
 echo " Starting provisioning of box. This might take some time."
 echo " "
-echo " If the provisioning log contains any error message then something has failed."
-echo " "
-echo " See logfile /tmp/vagrant-provisioning.log for more details."
-echo " "

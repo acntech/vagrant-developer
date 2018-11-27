@@ -25,11 +25,17 @@ Vagrant.configure(2) do |config|
       # Display the VirtualBox GUI when booting the machine
       vb.gui = true
 
+      # Customize CPU count
+      vb.cpus = "1"
+
       # Customize the amount of memory on the VM
       vb.memory = "2048"
 
-      # Customize CPU count
-      vb.cpus = "1"
+      # Customize amount of video memory
+      vb.customize ["modifyvm", :id, "--vram", "128"]
+
+      # Disable 3D acceleration
+      vb.customize ["modifyvm", :id, "--accelerate3d", "off"]
     end
   end
 
