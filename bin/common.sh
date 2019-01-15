@@ -7,6 +7,7 @@ SCRIPT_LOG="/tmp/vagrant-provisioning.log"
 PROVISIONING_FLAG="/var/local/.vagrant-provisioning"
 
 DEFAULT_USER="vagrant"
+DEFAULT_USER_HOME="/home/${DEFAULT_USER}"
 
 MODULE_ROOT_DIR="/opt"
 MODULE_DESKTOP_ENTRY_ROOT_DIR="/usr/share/applications"
@@ -190,7 +191,15 @@ function clear_disk() {
 function clear_history() {
     log " "
     log " Clearing BASH history"
-    cat /dev/null > ~/.bash_history
+    
+    if [ -f /root/.bash_history ]; then
+        cat /dev/null > /root/.bash_history
+    fi
+
+    if [ -f "${DEFAULT_USER_HOME}/.bash_history" ]; then
+        cat /dev/null > "${DEFAULT_USER_HOME}/.bash_history"
+    fi
+    
     history -c
 }
 
@@ -581,7 +590,7 @@ function on_error() {
     log " #"
     log " #  ERROR!"
     log " #  Provisioning error occurred in function ${func}() on line ${line} of script ${BASH_SOURCE[0]}"
-    log " #  See logfile ${SCRIPT_LOG} for more details"
+    log " #  See logfile ${SCRIPT_LOG} inside box for more details"
     log " #"
     log " ############################################"
 }
