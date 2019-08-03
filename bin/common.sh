@@ -374,7 +374,7 @@ function install_module_desktop_entry() {
     local module_description="$2"
     local module_executable_path="$3"
     local module_icon_path="$4"
-    local module_categories="$4"
+    local module_categories="$5"
 
     local desktop_entry="${module}.desktop"
     local desktop_entry_path="${MODULE_DESKTOP_ENTRY_ROOT_DIR}/${module}.desktop"
