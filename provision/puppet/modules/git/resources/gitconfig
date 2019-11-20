@@ -1,0 +1,30 @@
+[alias]
+    a = add
+    aa = add --all
+    co = checkout
+    ci = commit
+    cin = commit --no-edit
+    cia = commit --amend
+    cian = commit --amend --no-edit
+    cim = commit -m
+    cl = clone
+    br = branch
+    bru = branch -u origin/\"$(git rev-parse --abbrev-ref HEAD)\"
+    st = status
+    sts = status -s
+    lol = log --all --graph --decorate --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(yellow)%h%Creset %C(auto)%d%Creset %s %C(cyan)[%an <%ae> (%cn <%ce>) %cd]%Creset\" --abbrev-commit
+    undo = checkout -- .
+    unstage = reset --
+    fi = flow init
+    ff = flow feature
+    ffs = flow feature start
+    fff = flow feature finish
+    ffp = flow feature publish
+[core]
+    autocrlf = input
+    longpaths = true
+    excludesfile = /home/vagrant/.gitignore_global
+[push]
+    default = simple
+[fetch]
+    prune = true
