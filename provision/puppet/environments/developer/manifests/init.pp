@@ -5,10 +5,14 @@ Exec {
 class apt {
 
   exec { "apt-update":
-    command => "/usr/bin/apt update"
+    command => "apt update"
   }
 
-  # Ensure apt is setup before running apt-get update
+  exec { "apt-upgrade":
+    command => "apt --yes upgrade"
+  }
+
+  # Ensure apt is setup before running apt update
   Apt::Key <| |> -> Exec["apt-update"]
   Apt::Source <| |> -> Exec["apt-update"]
 

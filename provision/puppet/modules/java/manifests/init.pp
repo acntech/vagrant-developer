@@ -39,11 +39,6 @@ class java (
     require => Exec["install-java"],
   }
 
-  exec { "set-rng-to-urandom":
-    command => "sed -i 's/securerandom\.source=file:\/dev\/random/securerandom\.source=file:\/dev\/urandom/g' ${java_home}/jre/lib/security/java.security",
-    require => Exec["install-java"],
-  }
-
   exec { "set-default-jar":
     command => "update-alternatives --install \"/usr/bin/jar\" \"jar\" \"/opt/java/default/bin/jar\" 1 && update-alternatives --set \"jar\" \"/opt/java/default/bin/jar\"",
     require => Exec["install-java"],
@@ -52,5 +47,13 @@ class java (
   file { "java-env":
     path => "/etc/profile.d/java.sh",
     content => "export JAVA_HOME=/opt/java/default\nexport PATH=\${PATH}:\${JAVA_HOME}/bin\n",
+  }
+
+  file_line { "set-rng-to-urandom":
+    ensure => present,
+    path => "${java_home}/jre/lib/security/java.security",
+    line => "securerandom.source=file:/dev/urandom",
+    match => "securerandom.source=file:/dev/random",
+    require => Exec["install-java"],
   }
 }

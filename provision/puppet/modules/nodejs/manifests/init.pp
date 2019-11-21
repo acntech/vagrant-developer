@@ -1,5 +1,5 @@
 class nodejs (
-  $nodejs_main_version = "12"
+  $nodejs_main_version = "12",
   $packages = [
     "nodejs",
     "nodejs-legacy",
