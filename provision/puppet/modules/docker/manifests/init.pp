@@ -7,11 +7,12 @@ class docker (
   }
 
   exec { "docker-apt-repo":
-    command => "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
+    #command => "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
+    command => "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu disco stable\"",
     require => Exec["docker-apt-key"],
   }
 
-  exec { "apt-update":
+  exec { "docker-apt-update":
     command => "apt update",
     require => Exec["docker-apt-repo"],
   }
@@ -19,7 +20,7 @@ class docker (
   package { "docker-install":
     name => "docker-ce",
     ensure => "installed",
-    require => Exec["apt-update"],
+    require => Exec["docker-apt-update"],
   }
 
   user { "docker-group":

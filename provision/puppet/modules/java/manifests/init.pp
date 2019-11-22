@@ -48,12 +48,4 @@ class java (
     path => "/etc/profile.d/java.sh",
     content => "export JAVA_HOME=/opt/java/default\nexport PATH=\${PATH}:\${JAVA_HOME}/bin\n",
   }
-
-  file_line { "set-rng-to-urandom":
-    ensure => present,
-    path => "${java_home}/jre/lib/security/java.security",
-    line => "securerandom.source=file:/dev/urandom",
-    match => "securerandom.source=file:/dev/random",
-    require => Exec["install-java"],
-  }
 }

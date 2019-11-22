@@ -19,7 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.name = "AcnTech Ubuntu Developer"
 
     # Display the VirtualBox GUI when booting the machine
-    vb.gui = true
+    vb.gui = false
 
     # Customize CPU count
     vb.cpus = "1"

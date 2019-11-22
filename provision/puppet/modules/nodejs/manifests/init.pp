@@ -1,11 +1,5 @@
 class nodejs (
-  $nodejs_main_version = "12",
-  $packages = [
-    "nodejs",
-    "nodejs-legacy",
-    "npm",
-    "yarn",
-  ]
+  $nodejs_version = "node_12.x",
   ) {
 
   exec { "node-apt-key":
@@ -17,27 +11,40 @@ class nodejs (
   }
 
   exec { "node-apt-repo":
-    command => "add-apt-repository \"deb https://deb.nodesource.com/node_${nodejs_main_version}.x $(lsb_release -cs) main\"",
+    command => "add-apt-repository \"deb https://deb.nodesource.com/${nodejs_version} $(lsb_release -cs) main\"",
     require => Exec["node-apt-key"],
   }
 
-  exec { "node-apt-src-repo":
-    command => "add-apt-repository \"deb-src https://deb.nodesource.com/node_${nodejs_main_version}.x $(lsb_release -cs) main\"",
-    require => Exec["node-apt-key"],
-  }
+  #exec { "node-apt-src-repo":
+  #  command => "add-apt-repository \"deb-src https://deb.nodesource.com/${nodejs_version} $(lsb_release -cs) main\"",
+  #  require => Exec["node-apt-repo"],
+  #}
 
   exec { "yarn-apt-repo":
     command => "add-apt-repository \"deb https://dl.yarnpkg.com/debian stable main\"",
     require => Exec["yarn-apt-key"],
   }
 
-  exec { "apt-update":
+  exec { "node-apt-update":
     command => "apt update",
     require => Exec["node-apt-repo", "yarn-apt-repo"],
   }
 
-  package { $packages:
+  package { "node-install-nodejs":
+    name => "nodejs",
     ensure => "installed",
-    require => Exec["apt-update"],
+    require => Exec["node-apt-update"],
+  }
+
+  package { "node-install-nodejs-legacy":
+    name => "nodejs-legacy",
+    ensure => "installed",
+    require => Package["node-install-nodejs"],
+  }
+
+  package { "node-install-yarn":
+    name => "yarn",
+    ensure => "installed",
+    require => Package["node-install-nodejs"],
   }
 }

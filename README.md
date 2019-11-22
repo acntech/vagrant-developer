@@ -1,7 +1,7 @@
 # AcnTech Developer
 The AcnTech Developer Vagrant box is a premade image containing typical developer tool and utils.
 
-Created with Vagrant 2.2.3 and VirtualBox 5.2.22.
+Created with Vagrant 2.2.6 and VirtualBox 6.0.14.
 
 The box comes in two flavors, one based on Ubuntu and one based on Xubuntu.
 
@@ -26,8 +26,8 @@ The box has the following developer tools installed.
   * Java Security RNG changed to /dev/urandom
 * Apache Maven 3.6.2
 * Apache Ant 1.10.7
-* NodeJS 10.17.0
-  * NPM 6.11.3
+* NodeJS 12.13.0
+  * NPM 6.12.0
   * Yarn 1.19.1
 
 The following tools are no longer pre-installed since they are available as a snap from the software marketplace.
