@@ -31,6 +31,7 @@ The box has the following developer tools installed.
   * Yarn 1.19.1
 
 The following tools are no longer pre-installed since they are available as a snap from the software marketplace.
+
 * JetBrains IntelliJ
 * Sublime Text Editor
 * Postman
