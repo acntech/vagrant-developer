@@ -1,6 +1,13 @@
 class system (
   $packages = [
+    "dkms",
+    "curl",
+    "vim",
     "libaio1",
+    "net-tools",
+    "build-essential",
+    "openssh-server",
+    "puppet",
   ]
   ) {
 
@@ -32,5 +39,10 @@ class system (
   exec { "start-rng-tool":
     command => "/etc/init.d/rng-tools start",
     require => Exec["enable-urandom"],
+  }
+
+  file { "create-desktop-entry-dir" :
+    path => "/usr/local/share/applications",
+    ensure => "directory",
   }
 }

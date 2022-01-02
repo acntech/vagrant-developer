@@ -7,8 +7,7 @@ class docker (
   }
 
   exec { "docker-apt-repo":
-    #command => "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-    command => "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu disco stable\"",
+    command => "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
     require => Exec["docker-apt-key"],
   }
 
@@ -30,7 +29,7 @@ class docker (
   }
 
   exec { "docker-compose-install":
-    command => "curl -L https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m) > /usr/local/bin/docker-compose",
+    command => "curl -L https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose",
     unless => ["which docker-compose && docker-compose -v | grep -q \"version ${docker_compose_version}\""]
   }
 

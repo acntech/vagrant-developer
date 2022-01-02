@@ -1,5 +1,5 @@
 # AcnTech Ubuntu Developer
-AcnTech Ubuntu Developer box based on [acntech/ubuntu](https://app.vagrantup.com/acntech/boxes/ubuntu) v3.1.0 with Ubuntu Desktop 19.10 64-bit installed on a 100 GB disk.
+AcnTech Ubuntu Developer box based on [acntech/ubuntu](https://app.vagrantup.com/acntech/boxes/ubuntu).
 
 ### Usage
 See box on Vagrant Cloud: [acntech/ubuntu-developer](https://app.vagrantup.com/acntech/boxes/ubuntu-developer).

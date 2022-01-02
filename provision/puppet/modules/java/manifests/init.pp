@@ -1,12 +1,11 @@
 class java (
   $java_root = "/opt/java",
   $java_home = "/opt/java/default",
-  $java_install = "/opt/java/jdk-13.0.1",
-  $java_url = "https://download.java.net/java/GA/jdk13.0.1/cec27d702aa74d5a8630c65ae61e4305/9/GPL/openjdk-13.0.1_linux-x64_bin.tar.gz",
+  $java_install = "/opt/java/temurin-jdk-17.0.1",
   ) {
 
   exec { "download-java":
-    command => "wget --no-cookies --no-check-certificate --header \"Cookie: oraclelicense=accept-securebackup-cookie\" \"${java_url}\" -O /tmp/jdk.tar.gz",
+    command => "curl https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_linux_hotspot_17.0.1_12.tar.gz -o /tmp/jdk.tar.gz",
     timeout => 1800,
     unless => ["test -d ${java_install}"],
   }
@@ -44,8 +43,8 @@ class java (
     require => Exec["install-java"],
   }
 
-  file { "java-env":
+  file { "add-java-env":
     path => "/etc/profile.d/java.sh",
-    content => "export JAVA_HOME=/opt/java/default\nexport PATH=\${PATH}:\${JAVA_HOME}/bin\n",
+    source => "puppet:///modules/java/java-profile.sh",
   }
 }

@@ -1,12 +1,11 @@
 class ant (
-  $ant_version = "1.10.7", # Change this value to upgrade Ant.
+  $ant_version = "1.10.12", # Change this value to upgrade Ant.
   $ant_root = "/opt/ant",
   $ant_home = "/opt/ant/default",
-  $tmp = "/tmp"
   ) {
 
   exec { "download-ant" :
-    command => "wget --no-cookies --no-check-certificate https://www.apache.org/dist/ant/binaries/apache-ant-${ant_version}-bin.tar.gz -O ${tmp}/ant.tar.gz",
+    command => "curl -L https://www.apache.org/dist/ant/binaries/apache-ant-${ant_version}-bin.tar.gz -o /tmp/ant.tar.gz",
   }
 
   exec { "delete-ant":
@@ -21,19 +20,24 @@ class ant (
   }
 
   exec { "extract-ant":
-    command => "tar -xzvf ${tmp}/ant.tar.gz -C ${ant_root} && rm ${tmp}/ant.tar.gz",
+    command => "tar -xzvf /tmp/ant.tar.gz -C ${ant_root}",
     require => Exec["download-ant"],
   }
 
-  file { "ant-symlink":
+  file { "add-ant-symlink":
     path => "${ant_home}",
     ensure => "link",
     target => "${ant_root}/apache-ant-${ant_version}",
     require => Exec["extract-ant"],
   }
 
-  file { "/etc/profile.d/ant.sh":
-    content => "export ANT_HOME=${ant_home}\nexport PATH=\${PATH}:\$ANT_HOME/bin\n",
+  file { "add-ant-env":
+    path => "/etc/profile.d/ant.sh",
+    source => "puppet:///modules/ant/ant-profile.sh",
+  }
+
+  exec { "cleanup-ant":
+    command => "rm /tmp/ant.tar.gz",
     require => Exec["extract-ant"],
   }
 }

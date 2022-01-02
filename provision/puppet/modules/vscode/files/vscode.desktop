@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Visual Studio Code
+Exec=/opt/vscode/default/bin/code
+Terminal=false
+MimeType=text/plain;
+Icon=/opt/vscode/default/resources/app/resources/linux/code.png
+Categories=Development;
+StartupNotify=true

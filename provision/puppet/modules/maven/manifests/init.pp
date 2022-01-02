@@ -1,12 +1,11 @@
 class maven (
-  $maven_version = "3.6.2", # Change this value to upgrade Maven.
+  $maven_version = "3.8.4", # Change this value to upgrade Maven.
   $maven_root = "/opt/maven",
   $maven_home = "/opt/maven/default",
-  $tmp = "/tmp"
   ) {
 
   exec { "download-maven" :
-    command => "wget --no-cookies --no-check-certificate https://www.apache.org/dist/maven/maven-3/${maven_version}/binaries/apache-maven-${maven_version}-bin.tar.gz -O ${tmp}/maven.tar.gz",
+    command => "curl -L https://www.apache.org/dist/maven/maven-3/${maven_version}/binaries/apache-maven-${maven_version}-bin.tar.gz -o /tmp/maven.tar.gz",
   }
 
   exec { "delete-maven":
@@ -21,11 +20,11 @@ class maven (
   }
 
   exec { "extract-maven":
-    command => "tar -xzvf ${tmp}/maven.tar.gz -C ${maven_root} && rm ${tmp}/maven.tar.gz",
+    command => "tar -xzvf /tmp/maven.tar.gz -C ${maven_root}",
     require => Exec["download-maven"],
   }
 
-  file { "maven-symlink":
+  file { "add-maven-symlink":
     path => "${maven_home}",
     ensure => "link",
     target => "${maven_root}/apache-maven-${maven_version}",
@@ -37,8 +36,13 @@ class maven (
     require => Exec["extract-maven"],
   }
 
-  file { "/etc/profile.d/maven.sh":
-    content => "export MAVEN_HOME=${maven_home}\nexport M2_HOME=\${MAVEN_HOME}\nexport PATH=\${PATH}:\$MAVEN_HOME/bin\n",
+  file { "add-maven-env":
+    path => "/etc/profile.d/maven.sh",
+    source => "puppet:///modules/maven/maven-profile.sh",
+  }
+
+  exec { "cleanup-maven":
+    command => "rm /tmp/maven.tar.gz",
     require => Exec["extract-maven"],
   }
 }

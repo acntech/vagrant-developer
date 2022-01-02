@@ -36,7 +36,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   # Enable provisioning with puppet
   config.vm.provision "puppet" do |puppet|
-    puppet.environment = "developer"
+    puppet.environment = "basic"
     puppet.environment_path = "../provision/puppet/environments"
     puppet.module_path = "../provision/puppet/modules"
     puppet.options = "--verbose --debug"
