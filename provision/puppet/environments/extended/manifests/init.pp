@@ -9,6 +9,7 @@ include java
 include maven
 include ant
 include nodejs
+include sublime
 include vscode
 include intellij
 include postman

@@ -1,5 +1,7 @@
 # AcnTech Ubuntu Developer
-AcnTech Ubuntu Developer box based on [acntech/ubuntu](https://app.vagrantup.com/acntech/boxes/ubuntu).
+AcnTech Ubuntu Developer box based on [acntech/ubuntu](https://app.vagrantup.com/acntech/boxes/ubuntu) [v21.10.0](https://app.vagrantup.com/acntech/boxes/ubuntu/versions/21.10.0).
+
+Created with Vagrant 2.2.19 and VirtualBox 6.1.30.
 
 ### Usage
 See box on Vagrant Cloud: [acntech/ubuntu-developer](https://app.vagrantup.com/acntech/boxes/ubuntu-developer).

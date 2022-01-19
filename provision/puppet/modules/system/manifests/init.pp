@@ -1,13 +1,8 @@
 class system (
   $packages = [
-    "dkms",
-    "curl",
-    "vim",
     "libaio1",
     "net-tools",
-    "build-essential",
-    "openssh-server",
-    "puppet",
+    "apt-transport-https",
   ]
   ) {
 
@@ -34,6 +29,7 @@ class system (
   exec { "enable-urandom":
     command => "echo 'HRNGDEVICE=/dev/urandom' >> /etc/default/rng-tools",
     require => Package["install-rng-tools"],
+    unless => ["grep -q \"HRNGDEVICE=/dev/urandom\" /etc/default/rng-tools"],
   }
 
   exec { "start-rng-tool":

@@ -1,28 +1,27 @@
 class nodejs (
-  $nodejs_version = "node_12.x",
+  $nodejs_version = "node_17.x",
   ) {
 
   exec { "node-apt-key":
     command => "curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
+    unless => ["dpkg -l nodejs > /dev/null 2>&1"],
   }
 
   exec { "yarn-apt-key":
     command => "curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -",
+    unless => ["dpkg -l yarn > /dev/null 2>&1"],
   }
 
   exec { "node-apt-repo":
     command => "add-apt-repository \"deb https://deb.nodesource.com/${nodejs_version} $(lsb_release -cs) main\"",
-    require => Exec["node-apt-key"],
+    subscribe => Exec["node-apt-key"],
+    refreshonly => true,
   }
-
-  #exec { "node-apt-src-repo":
-  #  command => "add-apt-repository \"deb-src https://deb.nodesource.com/${nodejs_version} $(lsb_release -cs) main\"",
-  #  require => Exec["node-apt-repo"],
-  #}
 
   exec { "yarn-apt-repo":
     command => "add-apt-repository \"deb https://dl.yarnpkg.com/debian stable main\"",
-    require => Exec["yarn-apt-key"],
+    subscribe => Exec["yarn-apt-key"],
+    refreshonly => true,
   }
 
   exec { "node-apt-update":

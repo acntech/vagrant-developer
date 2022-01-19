@@ -1,44 +1,41 @@
 class postman (
   $postman_version = "9.7.1", # Change this value to upgrade Postman.
+  $postman_dir = "postman-${postman_version}",
   $postman_root = "/opt/postman",
-  $postman_home = "/opt/postman/default",
+  $postman_home = "${postman_root}/default",
+  $postman_install = "${postman_root}/${postman_dir}",
   ) {
 
   exec { "download-postman" :
-    command => "curl -L https://dl.pstmn.io/download/latest/linux64 -o /tmp/postman.tar.gz",
+    command => "curl -fsSL https://dl.pstmn.io/download/latest/linux64 -o /tmp/postman.tar.gz",
     unless => ["test -d ${postman_root}/postman-${postman_version}"],
   }
 
-  exec { "delete-postman":
-    command => "rm -rf ${postman_root}",
-    before => File["create-postman-dir"],
-  }
-
-  file { "create-postman-dir" :
-    path => "${postman_root}",
+  file { ["${postman_root}", "${postman_install}"] :
     ensure => "directory",
-    before => Exec["extract-postman"],
+    before => Exec["install-postman"],
   }
 
-  exec { "extract-postman":
-    command => "tar -xzvf /tmp/postman.tar.gz --strip-components=1 -C ${postman_root}/postman-${postman_version}",
+  exec { "install-postman":
+    command => "tar -xzvf /tmp/postman.tar.gz --strip-components=1 -C ${postman_install}",
     require => Exec["download-postman"],
   }
 
   file { "add-postman-symlink":
     path => "${postman_home}",
     ensure => "link",
-    target => "${postman_root}/postman-${postman_version}",
-    require => Exec["extract-postman"],
+    target => "./${postman_dir}",
+    require => Exec["install-postman"],
   }
 
   file { "add-postman-desktop-entry":
     path => "/usr/local/share/applications/postman.desktop",
     source => "puppet:///modules/postman/postman.desktop",
+    replace => false,
   }
 
   exec { "cleanup-postman":
     command => "rm /tmp/postman.tar.gz",
-    require => Exec["extract-postman"],
+    require => Exec["install-postman"],
   }
 }
