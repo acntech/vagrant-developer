@@ -7,7 +7,7 @@ class maven (
   ) {
 
   exec { "download-maven" :
-    command => "curl -fsSL https://www.apache.org/dist/maven/maven-3/${maven_version}/binaries/apache-maven-${maven_version}-bin.tar.gz -o /tmp/maven.tar.gz",
+    command => "curl -fsSL \"https://www.apache.org/dist/maven/maven-3/${maven_version}/binaries/apache-maven-${maven_version}-bin.tar.gz\" -o /tmp/maven.tar.gz",
     unless => ["test -d ${maven_install}"],
   }
 

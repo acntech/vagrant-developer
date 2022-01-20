@@ -3,7 +3,7 @@ class docker (
   ) {
 
   exec { "docker-apt-key":
-    command => "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+    command => "curl -fsSL \"https://download.docker.com/linux/ubuntu/gpg\" | sudo apt-key add -",
     unless => ["dpkg -l docker-ce > /dev/null 2>&1"],
   }
 
@@ -38,7 +38,7 @@ class docker (
   }
 
   exec { "docker-compose-install":
-    command => "curl -L https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose",
+    command => "curl -fsSL \"https://github.com/docker/compose/releases/download/${docker_compose_version}/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose",
     unless => ["which docker-compose > /dev/null 2>&1 && docker-compose -v | grep -q \"version ${docker_compose_version}\""],
   }
 

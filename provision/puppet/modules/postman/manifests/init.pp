@@ -7,7 +7,7 @@ class postman (
   ) {
 
   exec { "download-postman" :
-    command => "curl -fsSL https://dl.pstmn.io/download/latest/linux64 -o /tmp/postman.tar.gz",
+    command => "curl -fsSL \"https://dl.pstmn.io/download/latest/linux64\" -o /tmp/postman.tar.gz",
     unless => ["test -d ${postman_root}/postman-${postman_version}"],
   }
 

@@ -7,7 +7,7 @@ class intellij (
   ) {
 
   exec { "download-intellij" :
-    command => "curl -fsSL https://download.jetbrains.com/idea/ideaIU-${intellij_version}.tar.gz -o /tmp/intellij.tar.gz",
+    command => "curl -fsSL \"https://download.jetbrains.com/idea/ideaIU-${intellij_version}.tar.gz\" -o /tmp/intellij.tar.gz",
     unless => ["test -d ${intellij_install}"],
   }
 

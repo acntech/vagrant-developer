@@ -7,7 +7,7 @@ class ant (
   ) {
 
   exec { "download-ant" :
-    command => "curl -fsSL https://www.apache.org/dist/ant/binaries/apache-ant-${ant_version}-bin.tar.gz -o /tmp/ant.tar.gz",
+    command => "curl -fsSL \"https://www.apache.org/dist/ant/binaries/apache-ant-${ant_version}-bin.tar.gz\" -o /tmp/ant.tar.gz",
     unless => ["test -d ${ant_install}"],
   }
 

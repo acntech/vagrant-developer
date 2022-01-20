@@ -7,7 +7,7 @@ class vscode (
   ) {
 
   exec { "download-vscode" :
-    command => "curl -fsSL https://code.visualstudio.com/sha/download?build=stable&os=linux-x64 -o /tmp/vscode.tar.gz",
+    command => "curl -sSL \"https://code.visualstudio.com/sha/download?build=stable&os=linux-x64\" -o /tmp/vscode.tar.gz",
     unless => ["test -d ${vscode_install}"],
   }
 

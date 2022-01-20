@@ -3,12 +3,12 @@ class nodejs (
   ) {
 
   exec { "node-apt-key":
-    command => "curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
+    command => "curl -fsSL \"https://deb.nodesource.com/gpgkey/nodesource.gpg.key\" | sudo apt-key add -",
     unless => ["dpkg -l nodejs > /dev/null 2>&1"],
   }
 
   exec { "yarn-apt-key":
-    command => "curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -",
+    command => "curl -fsSL \"https://dl.yarnpkg.com/debian/pubkey.gpg\" | sudo apt-key add -",
     unless => ["dpkg -l yarn > /dev/null 2>&1"],
   }
 
