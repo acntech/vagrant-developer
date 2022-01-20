@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Specify Vagrant version and Vagrant API version
+Vagrant.require_version ">= 2.0.0"
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # Name of Vagrant Box
+  config.vm.box = "acntech/xubuntu-developer"
+
+  # Version of Vagrant Box
+  config.vm.box_version = "21.10.0"
+
+  config.vm.provider "virtualbox" do |vb|
+
+    # Name to display in Virtualbox
+    vb.name = "AcnTech Xubuntu onlyteo"
+
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = true
+
+    # Customize CPU count
+    vb.cpus = "4"
+
+    # Customize the amount of memory on the VM
+    vb.memory = "16384"
+
+    # Customize amount of video memory
+    vb.customize ["modifyvm", :id, "--vram", "128"]
+
+    # Disable 3D acceleration
+    vb.customize ["modifyvm", :id, "--accelerate3d", "off"]
+  end
+
+  # Enable provisioning with puppet
+  config.vm.provision "puppet" do |puppet|
+    puppet.environment = "extended"
+    puppet.environment_path = "../provision/puppet/environments"
+    puppet.module_path = "../provision/puppet/modules"
+    #puppet.options = "--verbose --debug"
+  end
+end
