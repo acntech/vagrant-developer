@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=IntelliJ IDEA
+Exec=/opt/intellij/default/bin/idea.sh
+Terminal=false
+MimeType=text/plain;
+Icon=/opt/intellij/default/bin/idea.png
+Categories=TextEditor;Development;
+StartupNotify=true

@@ -10,6 +10,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Name of Vagrant Box
   config.vm.box = "acntech/ubuntu"
 
+  # Version of Vagrant Box
+  config.vm.box_version = "21.10.0"
+
   # Don't generate new SSH key, but use the default insecure key
   config.ssh.insert_key = false
 
@@ -19,13 +22,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.name = "AcnTech Ubuntu Developer"
 
     # Display the VirtualBox GUI when booting the machine
-    vb.gui = false
+    vb.gui = true
 
     # Customize CPU count
     vb.cpus = "1"
 
     # Customize the amount of memory on the VM
-    vb.memory = "4096"
+    vb.memory = "2048"
 
     # Customize amount of video memory
     vb.customize ["modifyvm", :id, "--vram", "128"]
@@ -36,9 +39,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   # Enable provisioning with puppet
   config.vm.provision "puppet" do |puppet|
-    puppet.environment = "developer"
+    puppet.environment = "default"
     puppet.environment_path = "../provision/puppet/environments"
     puppet.module_path = "../provision/puppet/modules"
-    puppet.options = "--verbose --debug"
+    #puppet.options = "--verbose --debug"
   end
 end

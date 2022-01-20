@@ -16,5 +16,6 @@ class git {
     source => "puppet:///modules/git/gitconfig",
     owner => "vagrant",
     group => "vagrant",
+    replace => false,
   }
 }

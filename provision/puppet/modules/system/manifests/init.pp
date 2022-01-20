@@ -1,6 +1,8 @@
 class system (
   $packages = [
     "libaio1",
+    "net-tools",
+    "apt-transport-https",
   ]
   ) {
 
@@ -27,10 +29,16 @@ class system (
   exec { "enable-urandom":
     command => "echo 'HRNGDEVICE=/dev/urandom' >> /etc/default/rng-tools",
     require => Package["install-rng-tools"],
+    unless => ["grep -q \"HRNGDEVICE=/dev/urandom\" /etc/default/rng-tools"],
   }
 
   exec { "start-rng-tool":
     command => "/etc/init.d/rng-tools start",
     require => Exec["enable-urandom"],
+  }
+
+  file { "create-desktop-entry-dir" :
+    path => "/usr/local/share/applications",
+    ensure => "directory",
   }
 }

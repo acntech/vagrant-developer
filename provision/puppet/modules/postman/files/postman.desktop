@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Postman
+Exec=/opt/postman/default/app/Postman
+Terminal=false
+MimeType=text/plain;
+Icon=/opt/postman/default/app/icons/icon_128x128.png
+Categories=Development;
+StartupNotify=true

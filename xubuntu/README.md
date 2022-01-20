@@ -1,5 +1,7 @@
 # AcnTech Xubuntu Developer
-AcnTech Xubuntu Developer box based on [acntech/xubuntu](https://app.vagrantup.com/acntech/boxes/xubuntu) v3.1.0 with Xubuntu Desktop 19.10 64-bit installed on a 100 GB disk.
+AcnTech Xubuntu Developer box based on [acntech/xubuntu](https://app.vagrantup.com/acntech/boxes/xubuntu) [v21.10.0](https://app.vagrantup.com/acntech/boxes/xubuntu/versions/21.10.0).
+
+Created with Vagrant 2.2.19 and VirtualBox 6.1.30.
 
 ### Usage
 See box on Vagrant Cloud: [acntech/xubuntu-developer](https://app.vagrantup.com/acntech/boxes/xubuntu-developer).
